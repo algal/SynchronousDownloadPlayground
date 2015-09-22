@@ -5,7 +5,7 @@ import XCPlayground
 public func semaphore_downloadJSONFromURL(URL:NSURL, orTimeoutAfterDuration duration:NSTimeInterval = 10) -> AnyObject?
 {
   let previousShouldExecuteIdefinitely = XCPExecutionShouldContinueIndefinitely()
-  XCPSetExecutionShouldContinueIndefinitely(continueIndefinitely: true)
+  XCPSetExecutionShouldContinueIndefinitely(true)
   
   let semaphore = dispatch_semaphore_create(0)
   
@@ -17,11 +17,10 @@ public func semaphore_downloadJSONFromURL(URL:NSURL, orTimeoutAfterDuration dura
   var result:AnyObject?
   
   let task = session.dataTaskWithURL(URL, completionHandler: { (data, response, error) -> Void in
-    var JSONError:NSError?
     if let response = response as? NSHTTPURLResponse where response.statusCode == 200,
       let data = data
     {
-      result  = NSJSONSerialization.JSONObjectWithData(data, options: NSJSONReadingOptions.allZeros, error: &JSONError)
+      result  = try? NSJSONSerialization.JSONObjectWithData(data, options: NSJSONReadingOptions())
     }
     // the completion handler needs to know about the semaphore
     dispatch_semaphore_signal(semaphore)
@@ -34,7 +33,7 @@ public func semaphore_downloadJSONFromURL(URL:NSURL, orTimeoutAfterDuration dura
   
   task.cancel()
   
-  XCPSetExecutionShouldContinueIndefinitely(continueIndefinitely: previousShouldExecuteIdefinitely)
+  XCPSetExecutionShouldContinueIndefinitely(previousShouldExecuteIdefinitely)
   
   return result
 }

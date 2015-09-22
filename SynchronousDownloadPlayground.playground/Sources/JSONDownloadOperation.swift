@@ -73,11 +73,11 @@ public class JSONDownloadOperation : AsyncOperation
     super.init()
 
     self.task = session.dataTaskWithURL(self.downloadURL, completionHandler: { [weak self] (data, response, error) -> Void in
-      var JSONError:NSError?
+      
       if let response = response as? NSHTTPURLResponse where response.statusCode == 200,
         let data = data
       {
-        self?.outputObject  = NSJSONSerialization.JSONObjectWithData(data, options: NSJSONReadingOptions.allZeros, error: &JSONError)
+        self?.outputObject  = try? NSJSONSerialization.JSONObjectWithData(data, options: NSJSONReadingOptions())
       }
       else {
         self?.outputObject = error
