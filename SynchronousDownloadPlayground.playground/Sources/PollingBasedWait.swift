@@ -4,8 +4,8 @@ import XCPlayground
 
 func waitUntilTrue(@autoclosure pred:()->Bool, secondsUntilTimeout duration:NSTimeInterval = 25)
 {
-  let previousPlayGroundRunStatus = XCPExecutionShouldContinueIndefinitely()
-  XCPSetExecutionShouldContinueIndefinitely(true)
+  let previousPlayGroundRunStatus = XCPlaygroundPage.currentPage.needsIndefiniteExecution
+  XCPlaygroundPage.currentPage.needsIndefiniteExecution = true
   
   let start = NSDate()
   while true {
@@ -21,8 +21,8 @@ func waitUntilTrue(@autoclosure pred:()->Bool, secondsUntilTimeout duration:NSTi
       sleep(1)
     }
   }
-  
-  XCPSetExecutionShouldContinueIndefinitely(previousPlayGroundRunStatus)
+
+  XCPlaygroundPage.currentPage.needsIndefiniteExecution = previousPlayGroundRunStatus
 }
 
 public func polling_downloadJSONFromURL(URL:NSURL, orTimeoutAfterDuration duration:NSTimeInterval = 10) -> AnyObject?

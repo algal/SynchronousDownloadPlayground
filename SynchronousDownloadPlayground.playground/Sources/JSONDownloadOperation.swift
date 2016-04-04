@@ -77,7 +77,12 @@ public class JSONDownloadOperation : AsyncOperation
       if let response = response as? NSHTTPURLResponse where response.statusCode == 200,
         let data = data
       {
-        self?.outputObject  = try? NSJSONSerialization.JSONObjectWithData(data, options: NSJSONReadingOptions())
+        do {
+        self?.outputObject  = try NSJSONSerialization.JSONObjectWithData(data, options: NSJSONReadingOptions())
+        }
+        catch let JSONError as NSError {
+          self?.outputObject = JSONError
+        }
       }
       else {
         self?.outputObject = error

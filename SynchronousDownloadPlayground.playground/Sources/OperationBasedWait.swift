@@ -13,16 +13,16 @@ public func operation_downloadJSONFromURL(URL:NSURL, orTimeoutAfterDuration dura
 {
   let op = JSONDownloadOperation(downloadURL:URL,timeout:duration)
   
-  let previousExecutionShouldContinueIndefinitely = XCPExecutionShouldContinueIndefinitely()
-  XCPSetExecutionShouldContinueIndefinitely(true)
+  let previousExecutionShouldContinueIndefinitely = XCPlaygroundPage.currentPage.needsIndefiniteExecution
+  XCPlaygroundPage.currentPage.needsIndefiniteExecution = true
   
   let synchronousQueue = NSOperationQueue()
   synchronousQueue.maxConcurrentOperationCount = 1
   synchronousQueue.addOperation(op)
   synchronousQueue.waitUntilAllOperationsAreFinished()
-  
-  XCPSetExecutionShouldContinueIndefinitely(previousExecutionShouldContinueIndefinitely)
-  
+
+  XCPlaygroundPage.currentPage.needsIndefiniteExecution = previousExecutionShouldContinueIndefinitely
+
   return op.outputObject
 }
 

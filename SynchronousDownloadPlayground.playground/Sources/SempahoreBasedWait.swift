@@ -4,8 +4,8 @@ import XCPlayground
 
 public func semaphore_downloadJSONFromURL(URL:NSURL, orTimeoutAfterDuration duration:NSTimeInterval = 10) -> AnyObject?
 {
-  let previousShouldExecuteIdefinitely = XCPExecutionShouldContinueIndefinitely()
-  XCPSetExecutionShouldContinueIndefinitely(true)
+  let previousShouldExecuteIdefinitely = XCPlaygroundPage.currentPage.needsIndefiniteExecution
+  XCPlaygroundPage.currentPage.needsIndefiniteExecution = true
   
   let semaphore = dispatch_semaphore_create(0)
   
@@ -32,8 +32,8 @@ public func semaphore_downloadJSONFromURL(URL:NSURL, orTimeoutAfterDuration dura
   dispatch_semaphore_wait(semaphore, timeout)
   
   task.cancel()
-  
-  XCPSetExecutionShouldContinueIndefinitely(previousShouldExecuteIdefinitely)
+
+  XCPlaygroundPage.currentPage.needsIndefiniteExecution = previousShouldExecuteIdefinitely
   
   return result
 }
