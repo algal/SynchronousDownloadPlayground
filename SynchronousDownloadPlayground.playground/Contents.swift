@@ -20,28 +20,28 @@
 import Foundation
 import XCPlayground
 
-let url = URL(string: "https://unsplash.it/list")!
+let url = URL(string: "https://jsonplaceholder.typicode.com/posts")!
 
 enum WaitMethod {
   case operationQueue, gcdSemaphore, gcdSemaphore2, polling
 }
 
 
-let waitMethod:WaitMethod = .gcdSemaphore2 // play with me to try the three methods!
+let waitMethod:WaitMethod = .polling // play with me to try the three methods!
 
 switch waitMethod
 {
 case .operationQueue:
-  let downloaded1: AnyObject? = operation_downloadJSONFromURL(url, orTimeoutAfterDuration: 30)
+  let downloaded1: Any? = operation_downloadJSONFromURL(url, orTimeoutAfterDuration: 30)
   
 case .gcdSemaphore:
-  let downloaded2: AnyObject? = semaphore_downloadJSONFromURL(url, orTimeoutAfterDuration: 30)
+  let downloaded2: Any? = semaphore_downloadJSONFromURL(url, orTimeoutAfterDuration: 30)
 
 case .gcdSemaphore2:
-  let downloaded2: AnyObject? = observerSemaphore_downloadJSONFromURL(url, orTimeoutAfterDuration: 30)
+  let downloaded2: Any? = observerSemaphore_downloadJSONFromURL(url, orTimeoutAfterDuration: 30)
   
 case .polling:
-  let downloaded3: AnyObject? = polling_downloadJSONFromURL(url, orTimeoutAfterDuration: 30)
+  let downloaded3: Any? = polling_downloadJSONFromURL(url, orTimeoutAfterDuration: 30)
   
 }
 
