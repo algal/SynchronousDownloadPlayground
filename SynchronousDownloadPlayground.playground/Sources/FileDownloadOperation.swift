@@ -2,31 +2,31 @@ import Foundation
 
 class FileDownloadOperation : AsyncOperation
 {
-  let downloadURL:NSURL
+  let downloadURL:URL
   internal var outputObject:AnyObject?
   
-  private var session:NSURLSession
-  private var task:NSURLSessionDownloadTask!
+  fileprivate var session:URLSession
+  fileprivate var task:URLSessionDownloadTask!
   
-  var downloadedLocation:NSURL?
+  var downloadedLocation:URL?
   
-  internal init(downloadURL:NSURL, timeout:NSTimeInterval)
+  internal init(downloadURL:URL, timeout:TimeInterval)
   {
     self.downloadURL = downloadURL
     
-    self.session = NSURLSession(
-      configuration: NSURLSessionConfiguration.ephemeralSessionConfiguration(),
+    self.session = URLSession(
+      configuration: URLSessionConfiguration.ephemeral,
       delegate: nil,
       delegateQueue: nil)
     self.session.configuration.timeoutIntervalForResource = timeout
     
     super.init()
     
-    self.task = session.downloadTaskWithURL(self.downloadURL, completionHandler: { [weak self] (url, response, error) -> Void in
+    self.task = session.downloadTask(with: self.downloadURL, completionHandler: { [weak self] (url, response, error) -> Void in
       
       if let error = error {
         NSLog("download error = \(error)")
-        self?.outputObject = error
+        self?.outputObject = error as AnyObject?
       }
       else {
         NSLog("response=\(response)")
@@ -34,7 +34,7 @@ class FileDownloadOperation : AsyncOperation
         if let url = url {
           let savedURL = copyFileURLToTemporaryFileURL(url)
           NSLog("saveURL=\(savedURL)")
-          self?.outputObject = savedURL
+          self?.outputObject = savedURL as AnyObject?
           self?.downloadedLocation = savedURL
         }
       }
@@ -52,16 +52,16 @@ class FileDownloadOperation : AsyncOperation
   }
 }
 
-private func copyFileURLToTemporaryFileURL(file:NSURL) -> NSURL?
+private func copyFileURLToTemporaryFileURL(_ file:URL) -> URL?
 {
-  let fileName = NSString(format: "%@_%@", NSProcessInfo.processInfo().globallyUniqueString,"file")
+  let fileName = NSString(format: "%@_%@", ProcessInfo.processInfo.globallyUniqueString,"file")
   
   let tempDirectoryPath = NSTemporaryDirectory()
-  let tempDirectoryURL = NSURL(fileURLWithPath: tempDirectoryPath, isDirectory: true)
-  let destFileURL = tempDirectoryURL.URLByAppendingPathComponent(fileName as String)
+  let tempDirectoryURL = URL(fileURLWithPath: tempDirectoryPath, isDirectory: true)
+  let destFileURL = tempDirectoryURL.appendingPathComponent(fileName as String)
   
   do {
-    try NSFileManager.defaultManager().moveItemAtURL(file, toURL: destFileURL)
+    try FileManager.default.moveItem(at: file, to: destFileURL)
     return destFileURL
   }
   catch {

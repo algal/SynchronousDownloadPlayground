@@ -20,22 +20,25 @@
 import Foundation
 import XCPlayground
 
-let url = NSURL(string: "https://unsplash.it/list")!
+let url = URL(string: "https://unsplash.it/list")!
 
 enum WaitMethod {
-  case operationQueue, GCDSemaphore, polling
+  case operationQueue, gcdSemaphore, gcdSemaphore2, polling
 }
 
 
-let waitMethod:WaitMethod = .polling // play with me to try the three methods!
+let waitMethod:WaitMethod = .gcdSemaphore2 // play with me to try the three methods!
 
 switch waitMethod
 {
 case .operationQueue:
   let downloaded1: AnyObject? = operation_downloadJSONFromURL(url, orTimeoutAfterDuration: 30)
   
-case .GCDSemaphore:
+case .gcdSemaphore:
   let downloaded2: AnyObject? = semaphore_downloadJSONFromURL(url, orTimeoutAfterDuration: 30)
+
+case .gcdSemaphore2:
+  let downloaded2: AnyObject? = observerSemaphore_downloadJSONFromURL(url, orTimeoutAfterDuration: 30)
   
 case .polling:
   let downloaded3: AnyObject? = polling_downloadJSONFromURL(url, orTimeoutAfterDuration: 30)

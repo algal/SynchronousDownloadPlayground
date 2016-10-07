@@ -3,44 +3,48 @@
 //
 import Foundation
 
-public class AsyncOperation : NSOperation {
+open class AsyncOperation : Operation {
   
-  public override var asynchronous: Bool {
+  open override var isAsynchronous: Bool {
     return true
   }
-  
-  private var _executing = false {
+
+  // executing. tracks if async work is happening
+  fileprivate var _executing = false {
     willSet {
-      willChangeValueForKey("isExecuting")
+      willChangeValue(forKey: "isExecuting")
     }
     didSet {
-      didChangeValueForKey("isExecuting")
+      didChangeValue(forKey: "isExecuting")
     }
   }
   
-  public override var executing: Bool {
+  open override var isExecuting: Bool {
     return _executing
   }
-  
-  private var _finished = false {
+
+  // finished. tracks if the async work (and thus the operation) is done.
+  fileprivate var _finished = false {
     willSet {
-      willChangeValueForKey("isFinished")
+      willChangeValue(forKey: "isFinished")
     }
     
     didSet {
-      didChangeValueForKey("isFinished")
+      didChangeValue(forKey: "isFinished")
     }
   }
   
-  public override var finished: Bool {
+  open override var isFinished: Bool {
     return _finished
   }
   
-  public override func start() {
+  // start. starting the operation initiates the the async work and sets the isExecuting value to flag this fact.
+  open override func start() {
     _executing = true
     execute()
   }
-  
+
+  //
   func execute() {
     fatalError("Override this to start the async work")
   }
@@ -52,45 +56,47 @@ public class AsyncOperation : NSOperation {
   }
 }
 
-public class JSONDownloadOperation : AsyncOperation
+open class JSONDownloadOperation : AsyncOperation
 {
-  let downloadURL:NSURL
-  public var outputObject:AnyObject?
+  let downloadURL:URL
+  open var outputObject:Any?
 
-  private let sessionDelegate = NSURLSessionAllowBadCertificateDelegate()
-  private var session:NSURLSession
-  private var task:NSURLSessionDataTask!
+  fileprivate let sessionDelegate = NSURLSessionAllowBadCertificateDelegate()
+  fileprivate var session:URLSession
+  fileprivate var task:URLSessionDataTask!
   
-  public init(downloadURL:NSURL, timeout:NSTimeInterval) {
+  public init(downloadURL:URL, timeout:TimeInterval) {
     self.downloadURL = downloadURL
 
-    self.session = NSURLSession(
-      configuration: NSURLSessionConfiguration.ephemeralSessionConfiguration(),
+    self.session = URLSession(
+      configuration: URLSessionConfiguration.ephemeral,
       delegate: self.sessionDelegate,
       delegateQueue: nil)
     self.session.configuration.timeoutIntervalForResource = timeout
 
     super.init()
 
-    self.task = session.dataTaskWithURL(self.downloadURL, completionHandler: { [weak self] (data, response, error) -> Void in
+    self.task = session.dataTask(with: self.downloadURL, completionHandler: { [weak self] (data, response, error) -> Void in
       
-      if let response = response as? NSHTTPURLResponse where response.statusCode == 200,
+      if let response = response as? HTTPURLResponse , response.statusCode == 200,
         let data = data
       {
         do {
-        self?.outputObject  = try NSJSONSerialization.JSONObjectWithData(data, options: NSJSONReadingOptions())
+          self?.outputObject  = try JSONSerialization.jsonObject(with: data, options: JSONSerialization.ReadingOptions())
         }
         catch let JSONError as NSError {
           self?.outputObject = JSONError
         }
       }
       else {
-        self?.outputObject = error
+        self?.outputObject = error as AnyObject?
       }
+      // it is critical that every async operation signal when it is finished
       self?.finish()
       })
   }
-  
+
+  // initiates the async work, which must call self.finish when it finishes
   override func execute() {
     self.task.resume()
   }

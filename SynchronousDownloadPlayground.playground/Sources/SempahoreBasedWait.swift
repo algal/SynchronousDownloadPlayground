@@ -2,34 +2,34 @@ import Foundation
 
 import XCPlayground
 
-public func semaphore_downloadJSONFromURL(URL:NSURL, orTimeoutAfterDuration duration:NSTimeInterval = 10) -> AnyObject?
+public func semaphore_downloadJSONFromURL(_ URL:Foundation.URL, orTimeoutAfterDuration duration:TimeInterval = 10) -> Any?
 {
   let previousShouldExecuteIdefinitely = XCPlaygroundPage.currentPage.needsIndefiniteExecution
   XCPlaygroundPage.currentPage.needsIndefiniteExecution = true
   
-  let semaphore = dispatch_semaphore_create(0)
+  let semaphore = DispatchSemaphore(value: 0)
   
-  let session = NSURLSession(
-    configuration: NSURLSessionConfiguration.ephemeralSessionConfiguration(),
+  let session = URLSession(
+    configuration: URLSessionConfiguration.ephemeral,
     delegate: NSURLSessionAllowBadCertificateDelegate(),
     delegateQueue: nil)
   
-  var result:AnyObject?
+  var result:Any?
   
-  let task = session.dataTaskWithURL(URL, completionHandler: { (data, response, error) -> Void in
-    if let response = response as? NSHTTPURLResponse where response.statusCode == 200,
+  let task = session.dataTask(with: URL, completionHandler: { (data, response, error) -> Void in
+    if let response = response as? HTTPURLResponse , response.statusCode == 200,
       let data = data
     {
-      result  = try? NSJSONSerialization.JSONObjectWithData(data, options: NSJSONReadingOptions())
+      result  = try? JSONSerialization.jsonObject(with: data, options: JSONSerialization.ReadingOptions())
     }
     // the completion handler needs to know about the semaphore
-    dispatch_semaphore_signal(semaphore)
+    semaphore.signal()
   })
   
   task.resume()
 
-  let timeout:dispatch_time_t = dispatch_time(DISPATCH_TIME_NOW, Int64(NSEC_PER_SEC) * Int64(duration) )
-  dispatch_semaphore_wait(semaphore, timeout)
+  let timeout:DispatchTime = DispatchTime.now() + Double(Int64(NSEC_PER_SEC) * Int64(duration)) / Double(NSEC_PER_SEC)
+  semaphore.wait(timeout: timeout)
   
   task.cancel()
 
@@ -37,3 +37,4 @@ public func semaphore_downloadJSONFromURL(URL:NSURL, orTimeoutAfterDuration dura
   
   return result
 }
+

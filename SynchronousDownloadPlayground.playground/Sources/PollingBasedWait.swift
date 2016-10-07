@@ -2,12 +2,12 @@ import Foundation
 
 import XCPlayground
 
-func waitUntilTrue(@autoclosure pred:()->Bool, secondsUntilTimeout duration:NSTimeInterval = 25)
+func waitUntilTrue(_ pred:@autoclosure ()->Bool, secondsUntilTimeout duration:TimeInterval = 25)
 {
   let previousPlayGroundRunStatus = XCPlaygroundPage.currentPage.needsIndefiniteExecution
   XCPlaygroundPage.currentPage.needsIndefiniteExecution = true
   
-  let start = NSDate()
+  let start = Date()
   while true {
     if pred() {
       NSLog("condition met.")
@@ -25,17 +25,17 @@ func waitUntilTrue(@autoclosure pred:()->Bool, secondsUntilTimeout duration:NSTi
   XCPlaygroundPage.currentPage.needsIndefiniteExecution = previousPlayGroundRunStatus
 }
 
-public func polling_downloadJSONFromURL(URL:NSURL, orTimeoutAfterDuration duration:NSTimeInterval = 10) -> AnyObject?
+public func polling_downloadJSONFromURL(_ URL:Foundation.URL, orTimeoutAfterDuration duration:TimeInterval = 10) -> Any?
 {
-  let session = NSURLSession(
-    configuration: NSURLSessionConfiguration.ephemeralSessionConfiguration(),
+  let session = URLSession(
+    configuration: URLSessionConfiguration.ephemeral,
     delegate: NSURLSessionAllowBadCertificateDelegate(),
     delegateQueue: nil)
   
-  var result:AnyObject?
+  var result:Any?
   
-  let task = session.dataTaskWithURL(URL, completionHandler: { (data, response, error) -> Void in
-    if let response = response as? NSHTTPURLResponse where response.statusCode == 200,
+  let task = session.dataTask(with: URL, completionHandler: { (data, response, error) -> Void in
+    if let response = response as? HTTPURLResponse , response.statusCode == 200,
       let data = data
     {
       /* 
@@ -44,7 +44,7 @@ public func polling_downloadJSONFromURL(URL:NSURL, orTimeoutAfterDuration durati
       to wait on a pre-existing condition that would be part of the normal synchronous application 
       logic
       */
-      result  = try? NSJSONSerialization.JSONObjectWithData(data, options: NSJSONReadingOptions())
+      result  = try? JSONSerialization.jsonObject(with: data, options: JSONSerialization.ReadingOptions())
     }
   })
   task.resume()
